@@ -8,7 +8,6 @@ import io
 import json
 
 
-
 st.set_page_config(page_title="Stocks AI", layout="wide")
 
 api_key = os.getenv("gemini_api")
@@ -20,3 +19,5 @@ if not api_key:
 # Configure Google Generative AI
 genai.configure(api_key=api_key)
 model = genai.GenerativeModel('gemini-1.5-pro')
+
+st.write("API key retrieved successfully. Your app is now configured to use Google Generative AI.")
