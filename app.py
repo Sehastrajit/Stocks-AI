@@ -6,9 +6,13 @@ import os
 import pandas as pd
 import io
 import json
+from dotenv import load_dotenv
 
 
 st.set_page_config(page_title="Stocks AI", layout="wide")
+
+# Load environment variables from .env file
+load_dotenv()
 
 api_key = os.getenv("gemini_api")
 
