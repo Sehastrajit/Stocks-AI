@@ -103,6 +103,41 @@ def main():
     st.title("STOCK AI (Free Tier)")
     st.write("This app uses the Polygon.io API Free Tier, which provides daily data for the last 30 days.")
 
+    # Sidebar with LinkedIn badge
+    with st.sidebar:
+        st.subheader("Developer")
+        st.components.v1.html("""
+        <script src="https://platform.linkedin.com/badges/js/profile.js" async defer type="text/javascript"></script>
+        <div id="badge-wrapper">
+            <div class="badge-base LI-profile-badge" data-locale="en_US" data-size="medium" data-theme="dark" data-type="VERTICAL" data-vanity="sehastrajit-s-0a84b8203" data-version="v1">
+            </div>
+        </div>
+        <style>
+            #badge-wrapper * {
+                background-color: transparent !important;
+                background: none !important;
+                box-shadow: none !important;
+            }
+            .badge-base {
+                min-height: 350px;
+                position: relative;
+            }
+            .bdiframe {
+                background-color: transparent !important;
+            }
+            #badge-wrapper::after {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(38,39,48,255) !important;
+                z-index: -1;
+            }
+        </style>
+        """, height=400)
+
     col1, col2, col3 = st.columns([1,2,1])
     with col2:
         selected_symbol = st.selectbox("Choose a stock symbol", popular_symbols, index=popular_symbols.index(st.session_state.symbol) if st.session_state.symbol in popular_symbols else len(popular_symbols) - 1)
@@ -147,39 +182,6 @@ def main():
                 st.warning("Please enter a question for the AI.")
     elif st.session_state.data is not None:
         st.write("No data to display. Please check the API response.")
-
-    st.subheader("Developer")
-    st.components.v1.html("""
-    <script src="https://platform.linkedin.com/badges/js/profile.js" async defer type="text/javascript"></script>
-    <div id="badge-wrapper">
-        <div class="badge-base LI-profile-badge" data-locale="en_US" data-size="medium" data-theme="dark" data-type="VERTICAL" data-vanity="sehastrajit-s-0a84b8203" data-version="v1">
-        </div>
-    </div>
-    <style>
-        #badge-wrapper * {
-            background-color: transparent !important;
-            background: none !important;
-            box-shadow: none !important;
-        }
-        .badge-base {
-            min-height: 350px;
-            position: relative;
-        }
-        .bdiframe {
-            background-color: transparent !important;
-        }
-        #badge-wrapper::after {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(38,39,48,255) !important;
-            z-index: -1;
-        }
-    </style>
-    """, height=400)
 
 if __name__ == "__main__":
     main()
