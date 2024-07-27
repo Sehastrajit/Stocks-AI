@@ -8,13 +8,11 @@ from datetime import datetime, timedelta
 
 st.set_page_config(page_title="Stocks AI", layout="wide")
 
-# Initialize session state
 if 'data' not in st.session_state:
     st.session_state.data = None
 if 'symbol' not in st.session_state:
     st.session_state.symbol = ""
 
-# List of popular stock symbols
 popular_symbols = ["AAPL", "GOOGL", "MSFT", "AMZN", "FB", "TSLA", "NVDA", "JPM", "JNJ", "V", "Other"]
 
 def get_api_key(key_name):
@@ -125,7 +123,6 @@ def main():
         fig = create_stock_chart(st.session_state.data)
         st.plotly_chart(fig, use_container_width=True)
 
-        # Center the table and make it wider
         _, table_col, _ = st.columns([1, 3, 1])
         with table_col:
             st.dataframe(
@@ -150,6 +147,39 @@ def main():
                 st.warning("Please enter a question for the AI.")
     elif st.session_state.data is not None:
         st.write("No data to display. Please check the API response.")
+
+    st.subheader("Developer")
+    st.components.v1.html("""
+    <script src="https://platform.linkedin.com/badges/js/profile.js" async defer type="text/javascript"></script>
+    <div id="badge-wrapper">
+        <div class="badge-base LI-profile-badge" data-locale="en_US" data-size="medium" data-theme="dark" data-type="VERTICAL" data-vanity="sehastrajit-s-0a84b8203" data-version="v1">
+        </div>
+    </div>
+    <style>
+        #badge-wrapper * {
+            background-color: transparent !important;
+            background: none !important;
+            box-shadow: none !important;
+        }
+        .badge-base {
+            min-height: 350px;
+            position: relative;
+        }
+        .bdiframe {
+            background-color: transparent !important;
+        }
+        #badge-wrapper::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(38,39,48,255) !important;
+            z-index: -1;
+        }
+    </style>
+    """, height=400)
 
 if __name__ == "__main__":
     main()
