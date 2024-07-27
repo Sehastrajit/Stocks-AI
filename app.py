@@ -100,7 +100,7 @@ def get_ai_insights(df, symbol, prompt):
         return f"An error occurred while getting AI insights: {str(e)}"
 
 def main():
-    st.title("STOCK AI (Free Tier)")
+    st.title("STOCK AI ")
     st.write("This app uses the Polygon.io API Free Tier, which provides daily data for the last 30 days.")
 
     # Sidebar with LinkedIn badge
