@@ -7,15 +7,25 @@ from plotly.subplots import make_subplots
 
 st.set_page_config(page_title="Stocks AI", layout="wide")
 
-# Use Streamlit's secrets management for API keys
-gemini_api_key = st.secrets["gemini_api"]
-polygon_api_key = st.secrets["polygon_api_key"]
+def get_api_key(key_name):
+    try:
+        return st.secrets[key_name]
+    except KeyError:
+        st.error(f"Missing API key: {key_name}. Please set this in your Streamlit secrets.")
+        st.info("To set up secrets in Streamlit Cloud:")
+        st.code("""
+1. Go to your app's page on Streamlit Cloud
+2. Click on "Settings" (⚙️ icon)
+3. Go to "Secrets" section
+4. Add your API keys:
+   gemini_api = "your_gemini_api_key"
+   polygon_api_key = "your_polygon_api_key"
+        """)
+        st.stop()
 
-if not gemini_api_key or not polygon_api_key:
-    st.error("Failed to retrieve API keys. Make sure they're set in your Streamlit Cloud secrets.")
-    st.stop()
+gemini_api_key = get_api_key("gemini_api")
+polygon_api_key = get_api_key("polygon_api_key")
 
-# Configure Google Generative AI
 genai.configure(api_key=gemini_api_key)
 model = genai.GenerativeModel('gemini-1.5-pro')
 
@@ -25,7 +35,7 @@ def fetch_stocks_data(symbol="AAPL", timespan="minute", multiplier=5, from_date=
     data = response.json()
     
     if 'results' not in data:
-        st.error("Could not fetch stock data. Please check the symbol and try again.")
+        st.error(f"Could not fetch stock data. API response: {data}")
         return pd.DataFrame()
     
     df = pd.DataFrame(data['results'])
