@@ -68,6 +68,30 @@ def create_stock_chart(df):
 
     return fig
 
+def get_ai_insights(df, symbol, prompt):
+    try:
+        context = f"""
+        Stock: {symbol}
+        Date range: Last 30 days
+
+        Data summary:
+        {df.describe().to_string()}
+
+        Recent price movements:
+        {df[['timestamp', 'Close']].tail().to_string(index=False)}
+
+        User question: {prompt}
+        """
+        
+        response = model.generate_content(context)
+        
+        if response.text:
+            return response.text
+        else:
+            return "The AI model didn't provide a response. Please try asking a different question."
+    except Exception as e:
+        return f"An error occurred while getting AI insights: {str(e)}"
+
 def main():
     st.title("STOCK AI (Free Tier)")
     st.write("This app uses the Polygon.io API Free Tier, which provides daily data for the last 30 days.")
@@ -94,9 +118,13 @@ def main():
 
             prompt = st.text_area("Ask AI about the stock data")
             if st.button("Get AI Insights"):
-                context = f"Stock: {symbol}\nDate range: Last 30 days\n\nData summary:\n{df.describe().to_string()}"
-                response = model.generate_content(f"Context: {context}\n\nUser question: {prompt}")
-                st.write(response.text)
+                if prompt:
+                    with st.spinner("Getting AI insights..."):
+                        ai_response = get_ai_insights(df, symbol, prompt)
+                        st.write("AI Insights:")
+                        st.write(ai_response)
+                else:
+                    st.warning("Please enter a question for the AI.")
         else:
             st.write("No data to display. Please check the API response.")
 
