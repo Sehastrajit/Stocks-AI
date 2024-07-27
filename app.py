@@ -4,6 +4,7 @@ import google.generativeai as genai
 import requests
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+from datetime import datetime, timedelta
 
 st.set_page_config(page_title="Stocks AI", layout="wide")
 
@@ -24,13 +25,16 @@ def get_api_key(key_name):
         st.stop()
 
 gemini_api_key = get_api_key("gemini_api")
-polygon_api_key = get_api_key("stocks_api")  # Changed from "polygon_api_key" to "stocks_api"
+polygon_api_key = get_api_key("stocks_api")
 
 genai.configure(api_key=gemini_api_key)
 model = genai.GenerativeModel('gemini-1.5-pro')
 
-def fetch_stocks_data(symbol="AAPL", timespan="minute", multiplier=5, from_date="2024-07-26", to_date="2024-07-27"):
-    url = f"https://api.polygon.io/v2/aggs/ticker/{symbol}/range/{multiplier}/{timespan}/{from_date}/{to_date}?apiKey={polygon_api_key}"
+def fetch_stocks_data(symbol="AAPL"):
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=30)
+    
+    url = f"https://api.polygon.io/v2/aggs/ticker/{symbol}/range/1/day/{start_date.strftime('%Y-%m-%d')}/{end_date.strftime('%Y-%m-%d')}?apiKey={polygon_api_key}"
     response = requests.get(url)
     data = response.json()
     
@@ -57,7 +61,7 @@ def create_stock_chart(df):
     fig.add_trace(go.Bar(x=df['timestamp'], y=df['Volume'], name='Volume', marker_color='rgba(0, 0, 255, 0.5)'),
                   row=2, col=1)
 
-    fig.update_layout(height=600, title_text="Stock Data", xaxis_rangeslider_visible=False)
+    fig.update_layout(height=600, title_text="Stock Data (Last 30 Days)", xaxis_rangeslider_visible=False)
     fig.update_xaxes(title_text="Date", row=2, col=1)
     fig.update_yaxes(title_text="Price", row=1, col=1)
     fig.update_yaxes(title_text="Volume", row=2, col=1)
@@ -65,27 +69,20 @@ def create_stock_chart(df):
     return fig
 
 def main():
-    st.title("STOCK AI")
+    st.title("STOCK AI (Free Tier)")
+    st.write("This app uses the Polygon.io API Free Tier, which provides daily data for the last 30 days.")
 
     col1, col2, col3 = st.columns([1,2,1])
     with col2:
         symbol = st.text_input("Enter stock symbol", value="AAPL")
-        timespan = st.selectbox("Select timespan", ["minute", "hour", "day", "week", "month", "quarter", "year"], index=0)
-        multiplier = st.number_input("Multiplier", min_value=1, value=5)
-        from_date = st.date_input("From date")
-        to_date = st.date_input("To date")
         fetch_button = st.button("Fetch Data")
 
     if fetch_button:
-        df = fetch_stocks_data(symbol, timespan, multiplier, from_date.strftime("%Y-%m-%d"), to_date.strftime("%Y-%m-%d"))
+        df = fetch_stocks_data(symbol)
 
         if not df.empty:
             fig = create_stock_chart(df)
             st.plotly_chart(fig, use_container_width=True)
-
-            search = st.text_input("Search by Timestamp")
-            if search:
-                df = df[df['timestamp'].astype(str).str.contains(search, case=False)]
 
             st.dataframe(df.style.format({
                 'Open': '{:.2f}',
@@ -97,7 +94,7 @@ def main():
 
             prompt = st.text_area("Ask AI about the stock data")
             if st.button("Get AI Insights"):
-                context = f"Stock: {symbol}\nTimespan: {timespan}\nDate range: {from_date} to {to_date}\n\nData summary:\n{df.describe().to_string()}"
+                context = f"Stock: {symbol}\nDate range: Last 30 days\n\nData summary:\n{df.describe().to_string()}"
                 response = model.generate_content(f"Context: {context}\n\nUser question: {prompt}")
                 st.write(response.text)
         else:
