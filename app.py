@@ -14,6 +14,9 @@ if 'data' not in st.session_state:
 if 'symbol' not in st.session_state:
     st.session_state.symbol = ""
 
+# List of popular stock symbols
+popular_symbols = ["AAPL", "GOOGL", "MSFT", "AMZN", "FB", "TSLA", "NVDA", "JPM", "JNJ", "V", "Other"]
+
 def get_api_key(key_name):
     try:
         return st.secrets[key_name]
@@ -104,24 +107,37 @@ def main():
 
     col1, col2, col3 = st.columns([1,2,1])
     with col2:
-        symbol = st.text_input("Enter stock symbol", value=st.session_state.symbol)
+        selected_symbol = st.selectbox("Choose a stock symbol", popular_symbols, index=popular_symbols.index(st.session_state.symbol) if st.session_state.symbol in popular_symbols else len(popular_symbols) - 1)
+        
+        if selected_symbol == "Other":
+            custom_symbol = st.text_input("Enter custom stock symbol")
+            if custom_symbol:
+                st.session_state.symbol = custom_symbol.upper()
+        else:
+            st.session_state.symbol = selected_symbol
+
         fetch_button = st.button("Fetch Data")
 
-    if fetch_button:
-        st.session_state.data = fetch_stocks_data(symbol)
-        st.session_state.symbol = symbol
+    if fetch_button and st.session_state.symbol:
+        st.session_state.data = fetch_stocks_data(st.session_state.symbol)
 
     if st.session_state.data is not None and not st.session_state.data.empty:
         fig = create_stock_chart(st.session_state.data)
         st.plotly_chart(fig, use_container_width=True)
 
-        st.dataframe(st.session_state.data.style.format({
-            'Open': '{:.2f}',
-            'High': '{:.2f}',
-            'Low': '{:.2f}',
-            'Close': '{:.2f}',
-            'Volume': '{:,.0f}'
-        }))
+        # Center the table and make it wider
+        _, table_col, _ = st.columns([1, 3, 1])
+        with table_col:
+            st.dataframe(
+                st.session_state.data.style.format({
+                    'Open': '{:.2f}',
+                    'High': '{:.2f}',
+                    'Low': '{:.2f}',
+                    'Close': '{:.2f}',
+                    'Volume': '{:,.0f}'
+                }),
+                use_container_width=True
+            )
 
         prompt = st.text_area("Ask AI about the stock data")
         if st.button("Get AI Insights"):
