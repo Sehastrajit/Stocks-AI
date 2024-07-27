@@ -19,12 +19,12 @@ def get_api_key(key_name):
 3. Go to "Secrets" section
 4. Add your API keys:
    gemini_api = "your_gemini_api_key"
-   polygon_api_key = "your_polygon_api_key"
+   stocks_api = "your_polygon_api_key"
         """)
         st.stop()
 
 gemini_api_key = get_api_key("gemini_api")
-polygon_api_key = get_api_key("polygon_api_key")
+polygon_api_key = get_api_key("stocks_api")  # Changed from "polygon_api_key" to "stocks_api"
 
 genai.configure(api_key=gemini_api_key)
 model = genai.GenerativeModel('gemini-1.5-pro')
