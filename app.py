@@ -8,6 +8,12 @@ from datetime import datetime, timedelta
 
 st.set_page_config(page_title="Stocks AI", layout="wide")
 
+# Initialize session state
+if 'data' not in st.session_state:
+    st.session_state.data = None
+if 'symbol' not in st.session_state:
+    st.session_state.symbol = ""
+
 def get_api_key(key_name):
     try:
         return st.secrets[key_name]
@@ -98,35 +104,36 @@ def main():
 
     col1, col2, col3 = st.columns([1,2,1])
     with col2:
-        symbol = st.text_input("Enter stock symbol", value="AAPL")
+        symbol = st.text_input("Enter stock symbol", value=st.session_state.symbol)
         fetch_button = st.button("Fetch Data")
 
     if fetch_button:
-        df = fetch_stocks_data(symbol)
+        st.session_state.data = fetch_stocks_data(symbol)
+        st.session_state.symbol = symbol
 
-        if not df.empty:
-            fig = create_stock_chart(df)
-            st.plotly_chart(fig, use_container_width=True)
+    if st.session_state.data is not None and not st.session_state.data.empty:
+        fig = create_stock_chart(st.session_state.data)
+        st.plotly_chart(fig, use_container_width=True)
 
-            st.dataframe(df.style.format({
-                'Open': '{:.2f}',
-                'High': '{:.2f}',
-                'Low': '{:.2f}',
-                'Close': '{:.2f}',
-                'Volume': '{:,.0f}'
-            }))
+        st.dataframe(st.session_state.data.style.format({
+            'Open': '{:.2f}',
+            'High': '{:.2f}',
+            'Low': '{:.2f}',
+            'Close': '{:.2f}',
+            'Volume': '{:,.0f}'
+        }))
 
-            prompt = st.text_area("Ask AI about the stock data")
-            if st.button("Get AI Insights"):
-                if prompt:
-                    with st.spinner("Getting AI insights..."):
-                        ai_response = get_ai_insights(df, symbol, prompt)
-                        st.write("AI Insights:")
-                        st.write(ai_response)
-                else:
-                    st.warning("Please enter a question for the AI.")
-        else:
-            st.write("No data to display. Please check the API response.")
+        prompt = st.text_area("Ask AI about the stock data")
+        if st.button("Get AI Insights"):
+            if prompt:
+                with st.spinner("Getting AI insights..."):
+                    ai_response = get_ai_insights(st.session_state.data, st.session_state.symbol, prompt)
+                    st.write("AI Insights:")
+                    st.write(ai_response)
+            else:
+                st.warning("Please enter a question for the AI.")
+    elif st.session_state.data is not None:
+        st.write("No data to display. Please check the API response.")
 
 if __name__ == "__main__":
     main()
